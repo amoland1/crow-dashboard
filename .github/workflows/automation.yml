@@ -2,7 +2,7 @@ name: Cloud Automation Pipeline
 
 on:
   schedule:
-    - cron: '0 14 * * *'
+    - cron: '45 15 * * *'
   workflow_dispatch:
 
 jobs:
