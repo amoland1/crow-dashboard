@@ -28,7 +28,8 @@ fetch_airnow_raw <- function(start_time, end_time, params, bbox) {
                     "&BBOX=", bbox,
                     "&dataType=C&format=application/json&verbose=1&monitortype=0&includerawconcentrations=1&API_KEY=", api_key)
   
-  res <- RETRY("GET", api_url, times = 5, pause_base = 2)
+  res <- RETRY("GET", api_url, times = 5, pause_base = 2,
+             user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"))
   df <- fromJSON(rawToChar(res$content))
   
   if (!is.data.frame(df)) {
@@ -92,7 +93,8 @@ update_airnow_csv <- function(handy_df, csv_path) {
 # ------------------------------------------------------------------------------
 
 FURL <- "https://api.weather.gov/gridpoints/PQR/114,101"
-FCST <- RETRY("GET", FURL)
+FCST <- RETRY("GET", FURL, 
+              user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"))
 status <- status_code(FCST)
 
 data <- fromJSON(rawToChar(FCST$content))
