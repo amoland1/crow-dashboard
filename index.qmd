@@ -105,7 +105,7 @@ Additional Data:
 
 ---
 
-Updated: `r format(Sys.time(), '%B %d, %Y')`
+Updated: `r format(Sys.time(), '%B %d, %Y at %I:%M %p %Z', tz = 'US/Pacific')`
 
 # Pollutants
 ```{r}
