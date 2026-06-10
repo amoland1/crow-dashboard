@@ -753,7 +753,7 @@ list(value = "8-11a Tomorrow")
 ## Sounding Graphics
 #### 8-12 Forecast Sounding Image {width="50%"}
 ```{r}
-#| get 8-11p forecast sounding
+# get 8-11p forecast sounding
 fcsound_url <- "https://a.atmos.washington.edu/mm5rt/data/current_gfs/images_d2/kpdx.15.0000.snd.gif"
 response <- GET(fcsound_url)
 if (status_code(response) == 200) {
@@ -767,7 +767,7 @@ if (status_code(response) == 200) {
 
 #### 8-12a Forecast Sounding Image {width="50%"}
 ```{r}
-#| get 8-11a forecast sounding
+# get 8-11a forecast sounding
 amsound_url <- "https://a.atmos.washington.edu/mm5rt/data/current_gfs/images_d2/kpdx.27.0000.snd.gif"
 response <- GET(amsound_url)
 if (status_code(response) == 200) {
