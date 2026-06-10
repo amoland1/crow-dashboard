@@ -115,10 +115,10 @@ Updated: `r format(Sys.time(), '%B %d, %Y')`
 #| warning: false
 
 load("data/hourlydash.Rdata")
-load("data/hourlyobozone.Rdata")
+load("data/hourlyobozone.rData")
 load("data/hourlyobpm.Rdata")
 load("data/hourlyobozone_carus.rData")
-load("data/ForecastSummaryToday.rData")
+load("data/ForecastSummaryToday.Rdata")
 load("data/hourlyobno.Rdata")
 
 combined_archive_utc <- read_csv(
