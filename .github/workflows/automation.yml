@@ -3,8 +3,8 @@ name: Cloud Automation Pipeline
 
 on:
   schedule:
-    - cron: '15 * * * *' # Wakes up at 15 minutes past every hour automatically
-  workflow_dispatch: # Gives you a manual "Run" button on GitHub
+    - cron: '0 14 * * *'
+  workflow_dispatch:
 
 jobs:
   update-and-publish:
