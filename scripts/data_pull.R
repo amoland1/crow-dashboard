@@ -13,18 +13,10 @@ library(hms)
 library(readr)
 library(padr)
 
-api_key <- Sys.getenv("AIRNOW_API_KEY")
-api_url <- paste0("http://www.airnowapi.org/aq/data/?startDate=", start_time,
-                  "&endDate=", end_time,
-                  "&parameters=", params,
-                  "&BBOX=", bbox,
-                  "&dataType=C&format=application/json&verbose=1&monitortype=0&includerawconcentrations=1&API_KEY=", api_key)
-
 # ------------------------------------------------------------------------------
-# HELPER FUNCTIONS (Efficiency Additions)
+# HELPER FUNCTIONS 
 # ------------------------------------------------------------------------------
 
-# Efficiency 1: Function to handle AirNow API fetching and initial time parsing
 # Efficiency 1: Function to handle AirNow API fetching and initial time parsing
 fetch_airnow_raw <- function(start_time, end_time, params, bbox) {
   
@@ -39,13 +31,11 @@ fetch_airnow_raw <- function(start_time, end_time, params, bbox) {
   res <- GET(api_url)
   df <- fromJSON(rawToChar(res$content))
   
-  # SAFETY CHECK: If API returns an empty [] or an error {}, force it into a safe empty table
   if (!is.data.frame(df)) {
     df <- tibble(UTC = character(), Parameter = character(), Unit = character(), 
                  RawConcentration = numeric(), SiteName = character())
   }
   
-  # This part will now run safely even if the API returned no data
   df <- mutate(df, datetime = ymd_hm(UTC))
   df <- mutate(df, pdxtime = with_tz(datetime, tzone = "US/Pacific")) %>%
     mutate(date = date(pdxtime)) %>%
@@ -94,11 +84,11 @@ update_airnow_csv <- function(handy_df, csv_path) {
   write_csv(final_data, csv_path, na = "")
   print(paste("Data saved to", csv_path))
   
-  return(new_data_wide) # Returns the wide data back to the script for handytransposed
+  return(new_data_wide) 
 }
 
 # ------------------------------------------------------------------------------
-# retrieve & format forecast data (Using Efficiency 2)
+# retrieve & format forecast data 
 # ------------------------------------------------------------------------------
 
 FURL <- "https://api.weather.gov/gridpoints/PQR/114,101"
@@ -120,7 +110,6 @@ start_datetime <- as.POSIXct(paste(start, "00:00:00"), tz = "US/Pacific")
 end <- max(temp$pdxtime)
 hrseq <- seq.POSIXt(start_datetime, end, by = "1 hours")
 
-# Create a data frame with hourly values that fills in null values for download
 hourly <- as.data.frame(hrseq)
 hourly <- rename(hourly, pdxtime = hrseq)
 hourly <- mutate(hourly, pdxtime = ymd_hms(hourly$pdxtime))
@@ -141,14 +130,12 @@ hourly$tempfill <- na.locf(hourly$temp, na.rm =FALSE)
 hourly$humfill <- na.locf(hourly$hum, na.rm =FALSE)
 hourly$cloudfill <- na.locf(hourly$cloud, na.rm =FALSE)
 
-#Create dfs for today, noon to noon, and tomorrow 
 today <- today(tzone = "US/Pacific")
 tomorrow <- today + 1
 noon <- force_tz(as.POSIXct(paste(today, "12:00:00"), tz = "US/Pacific")) 
 eleven <- force_tz(as.POSIXct(paste(tomorrow, "11:00:00"), tz = "US/Pacific"))
 HourlyN2N <- filter(hourly, pdxtime >= noon & pdxtime <= eleven)
 
-#calculate metrics
 mixfil24 <- filter(mix, date == today)
 mixfiln2n <- filter(mix, pdxtime >= noon & pdxtime <= eleven)
 mixfilPM <- filter(mix, date == today & hour >= 18)
@@ -178,11 +165,9 @@ cloudfiln2n <- filter(cloud, pdxtime >= noon & pdxtime <= eleven)
 cloudfilPM <- filter(cloud, date == today & hour >= 18)
 cloudfiltomorrow <- filter(cloud, date == tomorrow)
 
-#convert units for dashboard charts
 mixfil24$feet <-mixfil24$meters*3.28084
 twindfil24$knots <- twindfil24$knots
 
-# Create table for dashboard charts
 hourlydash <- hourly %>%
   mutate(pdxtime2 = pdxtime) %>%
   separate(pdxtime2, into = c("date", "time"), sep = " ") %>%
@@ -192,7 +177,6 @@ hourlydash <- hourly %>%
   mutate(tempfillf = tempfill * (9/5)+32) %>%
   mutate(swindfillmph = swindfill *.621371)
 
-# Update Forecast Archive
 start_window <- floor_date(min(hourly$pdxtime), "day")
 end_window <- as.POSIXct(Sys.Date() + 2, tz = "US/Pacific")
 
@@ -214,13 +198,12 @@ archive_data <- if (file.exists(archive_file_path)) {
 }
 
 combined_archive <- bind_rows(archive_data, new_forecast_data) %>%
-  arrange(desc(forecast_run_date)) %>%      # Puts the newest runs at the top
-  distinct(pdxtime, .keep_all = TRUE) %>%   # Keeps only the first (newest) row per hour
+  arrange(desc(forecast_run_date)) %>%      
+  distinct(pdxtime, .keep_all = TRUE) %>%   
   arrange(pdxtime)
 
 write_csv(combined_archive, archive_file_path)
 
-#create mean variables for advisory interpretation
 mixToday <- mean(mixfil24$meters)
 mixN2N <- mean(mixfiln2n$meters)
 mixPM <- mean(mixfilPM$meters)
@@ -280,7 +263,7 @@ yzero <- force_tz(as.POSIXct(paste(yesterday, "00:00:00"), tz = "US/Pacific"))
 yone <- force_tz(as.POSIXct(paste(yesterday, "01:00:00"), tz = "US/Pacific"))
 midnight <- force_tz(as.POSIXct(paste(today, "00:00:00"), tz = "US/Pacific")) 
 
-#### Pull PM data (Using Efficiency 1 & 3)
+#### Pull PM data 
 b <- fetch_airnow_raw(start, end, "PM25", "-122.651652,45.475295,-122.564448,45.516207")
 pmtest <- b
 b <- select(b, Parameter, Unit, RawConcentration, SiteName, pdxtime) %>%
@@ -295,12 +278,11 @@ tN2NPM <- round(mean(tN2N$RawConcentration),1)
 yN2NPM <- round(mean(yN2N$RawConcentration),1)
 HR24PM <- round(mean(HR24$RawConcentration, na.rm = TRUE), 1)
 
-# Format, Update CSV, and capture handytransposed in one step
 new_pm_wide <- update_airnow_csv(handy, "data/RecentPM.csv")
 handytransposed <- new_pm_wide %>% select(date, any_of('00:00:00'), everything())
 
 
-#### Pull OZONE data - lafeyette (Using Efficiency 1 & 3)
+#### Pull OZONE data - lafeyette 
 d <- fetch_airnow_raw(start, end, "OZONE", "-122.651652,45.475295,-122.564448,45.516207")
 oztest <- d
 raw_ozone <- select(d, Parameter, Unit, RawConcentration, SiteName, pdxtime)
@@ -317,7 +299,7 @@ HR24OZ <- round(mean(OZ_HR24$RawConcentration[OZ_HR24$RawConcentration != -999])
 update_airnow_csv(OZ_handy, "data/RecentOzone.csv")
 
 
-#### Pull OZONE data - carus (Using Efficiency 1 & 3)
+#### Pull OZONE data - carus 
 f <- fetch_airnow_raw(start, end, "OZONE", "-122.621387,45.230743,-122.531436,45.284152")
 raw_ozone_carus <- select(f, Parameter, Unit, RawConcentration, SiteName, pdxtime)
 
@@ -330,7 +312,7 @@ tN2NOZ_carus <- round(mean(OZ_tN2N_carus$RawConcentration),1)
 yN2NOZ_carus <- round(mean(OZ_yN2N_carus$RawConcentration),1)
 HR24OZ_carus <- round(mean(OZ_HR24_carus$RawConcentration[OZ_HR24_carus$RawConcentration != -999], na.rm = TRUE),1)
 
-peakoz8hr_carus <- raw_ozone_carus %>% #feedback update 
+peakoz8hr_carus <- raw_ozone_carus %>% 
   filter(pdxtime >= (Sys.time() - hours(24))) %>%
   mutate(hour_of_day = hour(pdxtime)) %>%
   filter(hour_of_day >= 12 & hour_of_day <= 20) %>%
@@ -355,22 +337,25 @@ df <- mutate(df, date = as_date(df$date))
 df <- mutate(df, created = as_date(df$created))
 
 # Read old data and safely remove 'X' column if it exists
-old <- read.csv("ForecastSummaryToday.csv")
-old <- mutate(old, date = as_date(old$date))
-old <- mutate(old, created = as_date(old$created))
-old <- select(old, -any_of("X")) 
-
-new <- bind_rows(old, df)
+if (file.exists("data/ForecastSummaryToday.csv")) {
+  old <- read.csv("data/ForecastSummaryToday.csv")
+  old <- mutate(old, date = as_date(old$date))
+  old <- mutate(old, created = as_date(old$created))
+  old <- select(old, -any_of("X")) 
+  new <- bind_rows(old, df)
+} else {
+  new <- df
+}
 
 #Export data for use in dashboard
-write.csv(new,"ForecastSummaryToday.csv", row.names = FALSE)
-save(new, file = "ForecastSummaryToday.Rdata")
-save(hourlydash, file = "hourlydash.Rdata")
-save(handytransposed, file = "handytransposed.Rdata")
-save(b, file = "hourlyobpm.Rdata")
-save(raw_ozone, file = "hourlyobozone.rData")
-save(raw_ozone_carus, file = "hourlyobozone_carus.rData")
+write.csv(new,"data/ForecastSummaryToday.csv", row.names = FALSE)
+save(new, file = "data/ForecastSummaryToday.Rdata")
+save(hourlydash, file = "data/hourlydash.Rdata")
+save(handytransposed, file = "data/handytransposed.Rdata")
+save(b, file = "data/hourlyobpm.Rdata")
+save(raw_ozone, file = "data/hourlyobozone.rData")
+save(raw_ozone_carus, file = "data/hourlyobozone_carus.rData")
 h <- data.frame() 
-save(h, file = "hourlyobno.Rdata")
+save(h, file = "data/hourlyobno.Rdata")
 
 print("Run Complete!")
