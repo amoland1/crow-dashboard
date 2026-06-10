@@ -28,7 +28,7 @@ fetch_airnow_raw <- function(start_time, end_time, params, bbox) {
                     "&BBOX=", bbox,
                     "&dataType=C&format=application/json&verbose=1&monitortype=0&includerawconcentrations=1&API_KEY=", api_key)
   
-  res <- GET(api_url)
+  res <- RETRY("GET", api_url, times = 5, pause_base = 2)
   df <- fromJSON(rawToChar(res$content))
   
   if (!is.data.frame(df)) {
