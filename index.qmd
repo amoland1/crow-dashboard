@@ -37,7 +37,7 @@ pacman::p_load(
 
 
 ```{css}
-#| echo: false
+/*| echo: false */
 
 /* Hide scrollbars on all html widgets (dygraphs, plotly, etc) */
 .html-widget { overflow: hidden !important; }
