@@ -25,12 +25,16 @@ api_url <- paste0("http://www.airnowapi.org/aq/data/?startDate=", start_time,
 # ------------------------------------------------------------------------------
 
 # Efficiency 1: Function to handle AirNow API fetching and initial time parsing
+# Efficiency 1: Function to handle AirNow API fetching and initial time parsing
 fetch_airnow_raw <- function(start_time, end_time, params, bbox) {
+  
+  api_key <- Sys.getenv("AIRNOW_API_KEY")
+  
   api_url <- paste0("http://www.airnowapi.org/aq/data/?startDate=", start_time,
                     "&endDate=", end_time,
                     "&parameters=", params,
                     "&BBOX=", bbox,
-                    "&dataType=C&format=application/json&verbose=1&monitortype=0&includerawconcentrations=1&API_KEY=DE0DE880-71CA-4A6B-95E5-7A6D57A19B70")
+                    "&dataType=C&format=application/json&verbose=1&monitortype=0&includerawconcentrations=1&API_KEY=", api_key)
   
   res <- GET(api_url)
   df <- fromJSON(rawToChar(res$content))
