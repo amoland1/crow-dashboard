@@ -318,6 +318,7 @@ peakoz8hr_carus <- raw_ozone_carus %>%
   filter(pdxtime >= (Sys.time() - hours(24))) %>%
   mutate(hour_of_day = hour(pdxtime)) %>%
   filter(hour_of_day >= 12 & hour_of_day <= 20) %>%
+  filter(RawConcentration != -999) %>% # Extra filter to drop the -999 null placeholders
   pull(RawConcentration) %>%
   mean(na.rm = TRUE)
 
