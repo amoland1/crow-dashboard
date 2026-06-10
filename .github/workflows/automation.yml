@@ -48,7 +48,6 @@ jobs:
       - name: Render Quarto Dashboard
         uses: quarto-dev/quarto-actions/render@v2
         with:
-          to: html
           path: index.qmd
 
       - name: Commit and Push Updates
