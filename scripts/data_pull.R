@@ -13,7 +13,7 @@ library(hms)
 library(readr)
 library(padr)
 
-setwd("Data Outputs")
+setwd("crow-dashboard/data/")
 
 # ------------------------------------------------------------------------------
 # HELPER FUNCTIONS
