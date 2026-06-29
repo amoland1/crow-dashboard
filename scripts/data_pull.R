@@ -19,7 +19,7 @@ setwd("data")
 # HELPER FUNCTIONS
 # ------------------------------------------------------------------------------
 
-# Function to handle AirNow API fetching with browser disguise and initial time parsing
+# Function to handle AirNow API fetching
 fetch_airnow_raw <- function(start_time, end_time, params, bbox) {
   api_url <- paste0("http://www.airnowapi.org/aq/data/?startDate=", start_time,
                     "&endDate=", end_time,
