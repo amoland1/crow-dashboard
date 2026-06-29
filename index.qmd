@@ -96,13 +96,6 @@ Additional Data:
 - [NOAA GOES](https://www.star.nesdis.noaa.gov/GOES/sector_band.php?sat=G17&sector=pnw&band=GEOCOLOR&length=12)
 - [PDX Fire](https://x.com/PDXFire)
 
-2025 Operations:
-
-- [Calendar 2025](https://docs.google.com/spreadsheets/d/1V126h6-y0x3mxgt6WW8tl7srMtFIeKEo2hpFJf791f8/edit?gid=60679751#gid=60679751)
-- [WF Staffing 2025](https://docs.google.com/spreadsheets/d/1gBoaZXhJlHC_A5RAWnMkzyslcEDADuyO4SgM13KGLM0/edit?gid=0#gid=0)
-- [DEQ Smoke Call 2025](https://docs.google.com/document/d/1i_0W5F-yobNtvXpxOflYDsHqSMA5KbLMfGKE31BKng4/edit?tab=t.0#heading=h.alpuuam1yre8)
-- [WF Resources Leadership](https://docs.google.com/document/d/1ss1jjZlyREo9MtbtPITc0OXFG5EFyKCRh3RHw8HSKEo/edit?tab=t.0)
-
 ---
 
 Updated: `r format(Sys.time(), '%B %d, %Y at %I:%M %p %Z', tz = 'US/Pacific')`
